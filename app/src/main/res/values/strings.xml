@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Taller 3 Movil</string>
+    <string name="email_description">Ingrese un email</string>
+    <string name="apellidos">Ingrese sus apellidos</string>
+    <string name="nombres">Ingrese su nombre</string>
+    <string name="usuario">Registro de Usuario</string>
 </resources>
