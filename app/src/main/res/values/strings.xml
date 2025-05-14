@@ -4,4 +4,8 @@
     <string name="apellidos">Ingrese sus apellidos</string>
     <string name="nombres">Ingrese su nombre</string>
     <string name="usuario">Registro de Usuario</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="ingresar">Ingresar</string>
+    <string name="password">Ingrese una contraseña</string>
+    <string name="password_hint">Contraseña</string>
 </resources>

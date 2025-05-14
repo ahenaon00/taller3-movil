@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:backgroundTint="#2196F3"
-    tools:context="com.example.gooter_proyecto.RegistroActivity">
+    tools:context="com.example.taller3movil.RegistroActivity">
 
     <!-- Botón de regreso -->
     <ImageButton
@@ -141,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                android:text="Ingrese una contraseña"
+                android:text="@string/password"
                 android:textColor="@color/black"
                 android:textSize="11sp" />
 
@@ -158,7 +158,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
                     android:backgroundTint="#2196F3"
-                    android:text="Cancelar"
+                    android:text="@string/cancelar"
                     android:textColor="@color/white" />
 
                 <Button
@@ -166,7 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#2196F3"
-                    android:text="Ingresar"
+                    android:text="@string/ingresar"
                     android:textColor="@color/white" />
 
             </LinearLayout>
