@@ -6,9 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:backgroundTint="#2196F3"
-    tools:context="com.example.taller3movil.RegistroActivity">
+    tools:context="com.example.taller3movil.RegistarActivity">
 
-    <!-- Botón de regreso -->
     <ImageButton
         android:id="@+id/botonBackRegistro"
         android:layout_width="40dp"
@@ -21,7 +20,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Contenedor desplazable -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
@@ -41,7 +39,6 @@
             android:paddingTop="20dp"
             android:paddingBottom="40dp">
 
-            <!-- Título -->
             <TextView
                 android:id="@+id/registro"
                 android:layout_width="wrap_content"
@@ -53,7 +50,6 @@
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
-            <!-- Foto de perfil centrada -->
             <ImageView
                 android:id="@+id/ivProfilePhoto"
                 android:layout_width="100dp"
@@ -64,7 +60,6 @@
                 android:contentDescription="Foto de perfil"
                 android:src="@drawable/profileiconpng910" />
 
-            <!-- Nombre -->
             <EditText
                 android:id="@+id/nombreRegistro"
                 android:layout_width="match_parent"
@@ -84,7 +79,6 @@
                 android:textColor="@color/black"
                 android:textSize="11sp" />
 
-            <!-- Apellidos -->
             <EditText
                 android:id="@+id/apellidosRegistro"
                 android:layout_width="match_parent"
@@ -104,7 +98,6 @@
                 android:textColor="@color/black"
                 android:textSize="11sp" />
 
-            <!-- Correo -->
             <EditText
                 android:id="@+id/correoRegistro"
                 android:layout_width="match_parent"
@@ -124,7 +117,6 @@
                 android:textColor="@color/black"
                 android:textSize="11sp" />
 
-            <!-- Contraseña -->
             <EditText
                 android:id="@+id/contraseñaRegistro"
                 android:layout_width="match_parent"
@@ -145,7 +137,6 @@
                 android:textColor="@color/black"
                 android:textSize="11sp" />
 
-            <!-- Botones -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
