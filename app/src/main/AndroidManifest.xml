@@ -7,6 +7,8 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -19,13 +21,7 @@
         android:theme="@style/Theme.Taller3Movil"
         tools:targetApi="31">
         <activity
-            android:name=".LoginUsuarioActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginUsuario"
-            android:exported="false" />
-        <activity
-            android:name=".RegistroActivity"
+            android:name=".MapMenuActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
