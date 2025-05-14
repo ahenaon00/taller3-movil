@@ -53,4 +53,10 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+    implementation ("com.google.firebase:firebase-core:21.1.1")
+    implementation ("com.google.firebase:firebase-database:20.2.2")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
 }
