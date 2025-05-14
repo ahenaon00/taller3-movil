@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "870334137987",
+    "firebase_url": "https://taller3-fad0b-default-rtdb.firebaseio.com",
+    "project_id": "taller3-fad0b",
+    "storage_bucket": "taller3-fad0b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870334137987:android:4ee1e1ebaf0f5fde4e7db6",
+        "android_client_info": {
+          "package_name": "com.example.taller3movil"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJnV855nX83ndJstPt9Sg5YExA1PQE4Aw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

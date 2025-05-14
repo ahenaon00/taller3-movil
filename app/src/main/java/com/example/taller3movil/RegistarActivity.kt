@@ -10,6 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.taller3movil.databinding.ActivityRegistarBinding
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.database
@@ -37,13 +40,26 @@ class RegistarActivity : AppCompatActivity() {
         binding = ActivityRegistarBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Inicializa Firebase App Check con Play Integrity
+        FirebaseApp.initializeApp(this)
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+        firebaseAppCheck.installAppCheckProviderFactory(
+            // Usa el proveedor de Play Integrity
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        )
+
+
         auth = FirebaseAuth.getInstance()
         storage = Firebase.storage("gs://taller3-fad0b.firebasestorage.app")
         setUpBinding()
 
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             selectedImageUri = uri
-            procederConValidacionYRegistro()
+            binding.ivProfilePhoto.setImageURI(uri)
+        }
+
+        binding.ivProfilePhoto.setOnClickListener {
+            pickImageLauncher.launch("image/*")
         }
 
         binding.ingresarRegistro.setOnClickListener {
@@ -52,7 +68,7 @@ class RegistarActivity : AppCompatActivity() {
             tempEmail = binding.correoRegistro.text.toString()
             tempPassword = binding.contraseARegistro.text.toString()
 
-            pickImageLauncher.launch("image/*")
+            procederConValidacionYRegistro()
         }
 
         binding.botonBackRegistro.setOnClickListener {
