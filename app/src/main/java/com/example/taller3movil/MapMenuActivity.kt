@@ -42,6 +42,7 @@ class MapMenuActivity : AppCompatActivity() {
     private var markerLocationActual: Marker? = null
     val RADIUS_EARTH_METERS = 6378137
     private var permisoSolicitado = false
+    private var gpsDialogShown = false
 
     val locationSettings = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -127,6 +128,9 @@ class MapMenuActivity : AppCompatActivity() {
         map.onResume()
         map.controller.setZoom(18.0)
 
+        // Resetear el estado del diálogo cuando la actividad vuelve a primer plano
+        gpsDialogShown = false
+
         locationActual?.let {
             map.controller.animateTo(it)
         } ?: run {
@@ -154,17 +158,27 @@ class MapMenuActivity : AppCompatActivity() {
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
         task.addOnSuccessListener { locationSettingsResponse ->
+            // GPS está activado, comenzar actualizaciones
             startLocationUpdates()
         }
+
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
                 try {
-                    val isr: IntentSenderRequest =
-                        IntentSenderRequest.Builder(exception.resolution).build()
-                    locationSettings.launch(isr)
+                    // Mostrar diálogo solo si no lo hemos mostrado antes
+                    if (!gpsDialogShown) {
+                        val isr: IntentSenderRequest =
+                            IntentSenderRequest.Builder(exception.resolution).build()
+                        locationSettings.launch(isr)
+                        gpsDialogShown = true
+                    } else {
+                        // Ya mostramos el diálogo, no volver a pedir
+                        Toast.makeText(this, "Por favor activa el GPS en ajustes", Toast.LENGTH_LONG).show()
+                    }
                 } catch (sendEx: IntentSender.SendIntentException) {
-                    Toast.makeText(this, "El dispositivo no tiene GPS", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al acceder al GPS", Toast.LENGTH_SHORT).show()
                 }
             }
         }
