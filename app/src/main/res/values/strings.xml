@@ -8,4 +8,7 @@
     <string name="ingresar">Ingresar</string>
     <string name="password">Ingrese una contraseña</string>
     <string name="password_hint">Contraseña</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="disponibles_str">Jugadores Disponibles</string>
 </resources>

@@ -119,7 +119,8 @@ class MapMenuActivity : AppCompatActivity() {
             // TO DO
         }
         binding.listarDisponibles.setOnClickListener {
-            // TO DO
+            val bottomSheet = DisponiblesFragment()
+            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
     }
 
