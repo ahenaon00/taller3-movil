@@ -42,8 +42,10 @@ class DisponiblesFragment : BottomSheetDialogFragment() {
                     }
                 }
                 listaUsuarios = listaCheckeo
-                val adapter = AdapterDisponibles(requireContext(), R.layout.customrowusers, listaUsuarios)
-                binding.listUsuarios.adapter = adapter
+                if(isAdded && view!=null ) {
+                    val adapter = AdapterDisponibles(requireContext(), R.layout.customrowusers, listaUsuarios)
+                    binding.listUsuarios.adapter = adapter
+                }
             }
             override fun onCancelled(error: DatabaseError) {
             }
