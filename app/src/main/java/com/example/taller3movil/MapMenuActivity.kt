@@ -295,9 +295,8 @@ class MapMenuActivity : AppCompatActivity() {
 
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             }
+            usuarioActual?.let { it1 -> sendCloud(it1.nombre) }
         }
-
-        usuarioActual?.let { sendCloud(it.nombre) }
         binding.botonDetenerSeguimiento.setOnClickListener {
             seguimientoListener?.let { listener ->
                 seguimientoRef?.removeEventListener(listener)
