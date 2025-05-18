@@ -143,7 +143,8 @@ class MapMenuActivity : AppCompatActivity() {
                         val nombre = userSnapshot.child("nombre").value.toString()
                         val apellidos = userSnapshot.child("apellidos").value.toString()
                         val fotoUrl = userSnapshot.child("fotoUrl").value.toString()
-                        val usuario = Usuario(nombre, apellidos, fotoUrl)
+                        val correo = userSnapshot.child("correo").value.toString()
+                        val usuario = Usuario(nombre, apellidos,correo, fotoUrl)
                         uniqueId.setValue(usuario)
                         val locActual = mapOf(
                             "latitude" to locationActual?.latitude.toString(),
