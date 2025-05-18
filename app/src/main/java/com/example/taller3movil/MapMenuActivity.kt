@@ -25,11 +25,20 @@ import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
 import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
+
 
 class MapMenuActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMapMenuBinding
@@ -43,6 +52,9 @@ class MapMenuActivity : AppCompatActivity() {
     val RADIUS_EARTH_METERS = 6378137
     private var permisoSolicitado = false
     private var gpsDialogShown = false
+    private var refPush : DatabaseReference? = null
+    private var disponible : Boolean = false
+
 
     val locationSettings = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -116,12 +128,40 @@ class MapMenuActivity : AppCompatActivity() {
             // TO DO
         }
         binding.disponible.setOnClickListener {
-            // TO DO
+            disponible = true
+            val user =  FirebaseAuth.getInstance().currentUser
+            Log.i("USER", user?.email.toString())
+            val ref = FirebaseDatabase.getInstance().getReference()
+            val refDisponibles = ref.child("disponibles")
+            val uniqueId = refDisponibles.push()
+            refPush = uniqueId
+            val refUsuarios = ref.child("usuarios")
+            val query = refUsuarios.orderByChild("correo").equalTo(user?.email)
+            query.get().addOnSuccessListener { snapshot ->
+                if(snapshot.exists()) {
+                    for (userSnapshot in snapshot.children) {
+                        val nombre = userSnapshot.child("nombre").value.toString()
+                        val apellidos = userSnapshot.child("apellidos").value.toString()
+                        val fotoUrl = userSnapshot.child("fotoUrl").value.toString()
+                        val usuario = Usuario(nombre, apellidos, fotoUrl)
+                        uniqueId.setValue(usuario)
+                        val locActual = mapOf(
+                            "latitude" to locationActual?.latitude.toString(),
+                            "longitude" to locationActual?.longitude.toString()
+                        )
+                        uniqueId.updateChildren(locActual)
+                    }
+                }
+            }.addOnFailureListener { e ->
+                Log.e("DatabaseError", "Error al obtener los datos de la base de datos: ${e.message}")
+            }
         }
         binding.listarDisponibles.setOnClickListener {
             val bottomSheet = DisponiblesFragment()
+
             bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
+
     }
 
     override fun onResume() {
@@ -153,6 +193,11 @@ class MapMenuActivity : AppCompatActivity() {
         super.onPause()
         map.onPause()
         stopLocationUpdates()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        refPush?.removeValue()
     }
 
     fun locationSettings() {
@@ -226,7 +271,13 @@ class MapMenuActivity : AppCompatActivity() {
 
     fun updateUI(location: Location) {
         val newLocation = GeoPoint(location.latitude, location.longitude)
-
+        if (disponible) {
+            val locActual = mapOf(
+                "latitude" to location.latitude.toString(),
+                "longitude" to location.longitude.toString()
+            )
+            refPush?.updateChildren(locActual)
+        }
         var moverCamara = false
 
         if (locationActual == null) {
