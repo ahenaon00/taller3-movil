@@ -198,7 +198,7 @@ class MapMenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        refPush?.removeValue()
+        eliminarUsuarioDisponible()
     }
 
     fun locationSettings() {
@@ -326,5 +326,22 @@ class MapMenuActivity : AppCompatActivity() {
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         val result = RADIUS_EARTH_METERS * c
         return Math.round(result * 100.0) / 100.0
+    }
+    private fun eliminarUsuarioDisponible() {
+        val user = FirebaseAuth.getInstance().currentUser
+        val correo = user?.email ?: return
+
+        val ref = FirebaseDatabase.getInstance().getReference("disponibles")
+        val query = ref.orderByChild("correo").equalTo(correo)
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (child in snapshot.children) {
+                    child.ref.removeValue()
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
     }
 }
