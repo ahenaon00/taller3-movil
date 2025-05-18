@@ -162,40 +162,45 @@ class MapMenuActivity : AppCompatActivity() {
             // TO DO
         }
         binding.disponible.setOnClickListener {
-            disponible = true
-            val user =  FirebaseAuth.getInstance().currentUser
-            Log.i("USER", user?.email.toString())
-            val ref = FirebaseDatabase.getInstance().getReference()
-            val refDisponibles = ref.child("disponibles")
-            val uniqueId = refDisponibles.push()
-            refPush = uniqueId
-            val refUsuarios = ref.child("usuarios")
-            val query = refUsuarios.orderByChild("correo").equalTo(user?.email)
-            query.get().addOnSuccessListener { snapshot ->
-                if(snapshot.exists()) {
-                    for (userSnapshot in snapshot.children) {
-                        val nombre = userSnapshot.child("nombre").value.toString()
-                        val apellidos = userSnapshot.child("apellidos").value.toString()
-                        val fotoUrl = userSnapshot.child("fotoUrl").value.toString()
-                        val correo = userSnapshot.child("correo").value.toString()
-                        val usuario = Usuario(nombre, apellidos,correo, fotoUrl)
-                        uniqueId.setValue(usuario)
-                        val locActual = mapOf(
-                            "latitude" to locationActual?.latitude.toString(),
-                            "longitude" to locationActual?.longitude.toString()
-                        )
-                        uniqueId.updateChildren(locActual)
-                        usuarioActual = usuario
+            if (disponible) {
+                disponible = true
+                val user = FirebaseAuth.getInstance().currentUser
+                Log.i("USER", user?.email.toString())
+                val ref = FirebaseDatabase.getInstance().getReference()
+                val refDisponibles = ref.child("disponibles")
+                val uniqueId = refDisponibles.push()
+                refPush = uniqueId
+                val refUsuarios = ref.child("usuarios")
+                val query = refUsuarios.orderByChild("correo").equalTo(user?.email)
+                query.get().addOnSuccessListener { snapshot ->
+                    if (snapshot.exists()) {
+                        for (userSnapshot in snapshot.children) {
+                            val nombre = userSnapshot.child("nombre").value.toString()
+                            val apellidos = userSnapshot.child("apellidos").value.toString()
+                            val fotoUrl = userSnapshot.child("fotoUrl").value.toString()
+                            val correo = userSnapshot.child("correo").value.toString()
+                            val usuario = Usuario(nombre, apellidos, correo, fotoUrl)
+                            uniqueId.setValue(usuario)
+                            val locActual = mapOf(
+                                "latitude" to locationActual?.latitude.toString(),
+                                "longitude" to locationActual?.longitude.toString()
+                            )
+                            uniqueId.updateChildren(locActual)
+                            usuarioActual = usuario
+                        }
                     }
+                }.addOnFailureListener { e ->
+                    Log.e(
+                        "DatabaseError",
+                        "Error al obtener los datos de la base de datos: ${e.message}"
+                    )
                 }
-            }.addOnFailureListener { e ->
-                Log.e("DatabaseError", "Error al obtener los datos de la base de datos: ${e.message}")
             }
-        }
-        binding.listarDisponibles.setOnClickListener {
-            val bottomSheet = DisponiblesFragment()
+            binding.listarDisponibles.setOnClickListener {
+                val bottomSheet = DisponiblesFragment()
 
-            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+                bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            }
         }
 
     }
