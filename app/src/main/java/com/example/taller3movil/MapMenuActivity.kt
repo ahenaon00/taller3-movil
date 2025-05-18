@@ -54,6 +54,7 @@ class MapMenuActivity : AppCompatActivity() {
     private var gpsDialogShown = false
     private var refPush : DatabaseReference? = null
     private var disponible : Boolean = false
+    private var usuarioActual : Usuario? = null
 
 
     val locationSettings = registerForActivityResult(
@@ -151,6 +152,7 @@ class MapMenuActivity : AppCompatActivity() {
                             "longitude" to locationActual?.longitude.toString()
                         )
                         uniqueId.updateChildren(locActual)
+                        usuarioActual = usuario
                     }
                 }
             }.addOnFailureListener { e ->
@@ -198,7 +200,7 @@ class MapMenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        eliminarUsuarioDisponible()
+        refPush?.removeValue()
     }
 
     fun locationSettings() {
@@ -327,21 +329,5 @@ class MapMenuActivity : AppCompatActivity() {
         val result = RADIUS_EARTH_METERS * c
         return Math.round(result * 100.0) / 100.0
     }
-    private fun eliminarUsuarioDisponible() {
-        val user = FirebaseAuth.getInstance().currentUser
-        val correo = user?.email ?: return
 
-        val ref = FirebaseDatabase.getInstance().getReference("disponibles")
-        val query = ref.orderByChild("correo").equalTo(correo)
-
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (child in snapshot.children) {
-                    child.ref.removeValue()
-                }
-            }
-            override fun onCancelled(error: DatabaseError) {
-            }
-        })
-    }
 }
