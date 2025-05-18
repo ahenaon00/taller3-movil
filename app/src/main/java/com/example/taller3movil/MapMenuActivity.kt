@@ -1,5 +1,6 @@
 package com.example.taller3movil
 
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
@@ -252,7 +253,12 @@ class MapMenuActivity : AppCompatActivity() {
 
     private fun inicializarListenersBotones() {
         binding.cerrarSesion.setOnClickListener {
-            // TO DO
+            FirebaseAuth.getInstance().signOut()
+
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         }
         binding.disponible.setOnClickListener {
             if (!disponible) {
