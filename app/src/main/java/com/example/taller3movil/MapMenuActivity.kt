@@ -234,6 +234,7 @@ class MapMenuActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         refPush?.removeValue()
+        disponible = false
     }
 
     fun locationSettings() {
