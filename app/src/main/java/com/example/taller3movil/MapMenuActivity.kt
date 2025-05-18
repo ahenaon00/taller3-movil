@@ -298,7 +298,7 @@ class MapMenuActivity : AppCompatActivity() {
                             usuarioActual = usuario
 
                             // Enviar notificación
-                            usuarioActual?.let { u -> sendCloud(u.nombre) }
+                            usuarioActual?.let { u -> sendCloud(u.nombre,u.correo) }
                         }
                     }
                 }.addOnFailureListener { e ->
@@ -310,7 +310,7 @@ class MapMenuActivity : AppCompatActivity() {
             binding.listarDisponibles.setOnClickListener {
                 val bottomSheet = DisponiblesFragment()
 
-            } else {
+            //} else {
                 // DESACTIVAR DISPONIBILIDAD
                 disponible = false
                 binding.disponible.text = "Estoy disponible"
