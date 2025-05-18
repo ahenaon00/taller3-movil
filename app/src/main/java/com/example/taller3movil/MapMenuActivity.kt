@@ -260,6 +260,11 @@ class MapMenuActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+        binding.listarDisponibles.setOnClickListener {
+            val bottomSheet = DisponiblesFragment()
+            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+        }
+
         binding.disponible.setOnClickListener {
             if (!disponible) {
                 disponible = true
@@ -295,11 +300,6 @@ class MapMenuActivity : AppCompatActivity() {
                         "Error al obtener los datos de la base de datos: ${e.message}"
                     )
                 }
-            }
-            binding.listarDisponibles.setOnClickListener {
-                val bottomSheet = DisponiblesFragment()
-
-                bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             }
             usuarioActual?.let { it1 -> sendCloud(it1.nombre) }
         }
