@@ -53,7 +53,7 @@ import java.io.IOException
 
 class MapMenuActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMapMenuBinding
-    lateinit var map : MapView
+    lateinit var map: MapView
     val BOGOTA = GeoPoint(4.62, -74.07)
     lateinit var locationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
@@ -63,9 +63,9 @@ class MapMenuActivity : AppCompatActivity() {
     val RADIUS_EARTH_METERS = 6378137
     private var permisoSolicitado = false
     private var gpsDialogShown = false
-    private var refPush : DatabaseReference? = null
-    private var disponible : Boolean = false
-    private var usuarioActual : Usuario? = null
+    private var refPush: DatabaseReference? = null
+    private var disponible: Boolean = false
+    private var usuarioActual: Usuario? = null
     private var usuarioMarker: Marker? = null
     private var seguimientoRef: DatabaseReference? = null
     private var seguimientoListener: ValueEventListener? = null
@@ -101,7 +101,11 @@ class MapMenuActivity : AppCompatActivity() {
         if (isGranted) {
             Toast.makeText(this, "Notificaciones permitidas en MapMenu", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Las notificaciones están deshabilitadas en MapMenu", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Las notificaciones están deshabilitadas en MapMenu",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -131,7 +135,8 @@ class MapMenuActivity : AppCompatActivity() {
             Log.d("SEGUIMIENTO", "Nombre recibido: $nombre")
 
             if (pushId != null) {
-                seguimientoRef = FirebaseDatabase.getInstance().getReference("disponibles").child(pushId)
+                seguimientoRef =
+                    FirebaseDatabase.getInstance().getReference("disponibles").child(pushId)
                 Log.d("SEGUIMIENTO", "Referencia Firebase creada: disponibles/$pushId")
 
                 seguimientoListener = object : ValueEventListener {
@@ -150,7 +155,10 @@ class MapMenuActivity : AppCompatActivity() {
                                 usuarioMarker = Marker(map).apply {
                                     title = nombre
                                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                    icon = ContextCompat.getDrawable(this@MapMenuActivity, R.drawable.ic_usuario_disponible)
+                                    icon = ContextCompat.getDrawable(
+                                        this@MapMenuActivity,
+                                        R.drawable.ic_usuario_disponible
+                                    )
                                     map.overlays.add(this)
                                 }
                                 Log.d("SEGUIMIENTO", "Marker creado")
@@ -167,7 +175,11 @@ class MapMenuActivity : AppCompatActivity() {
 
                     override fun onCancelled(error: DatabaseError) {
                         Log.e("SEGUIMIENTO", "Error de suscripción: ${error.message}")
-                        Toast.makeText(this@MapMenuActivity, "Error de suscripción", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MapMenuActivity,
+                            "Error de suscripción",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
@@ -187,7 +199,10 @@ class MapMenuActivity : AppCompatActivity() {
 
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) ==
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
                 Log.d("MapMenuActivity", "Notification permission already granted.")
@@ -197,8 +212,7 @@ class MapMenuActivity : AppCompatActivity() {
                 // Por ahora, solo lo solicitamos.
                 Log.d("MapMenuActivity", "Showing rationale or requesting permission.")
                 requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-            else {
+            } else {
                 // Solicita el permiso
                 Log.d("MapMenuActivity", "Requesting notification permission.")
                 requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -207,7 +221,8 @@ class MapMenuActivity : AppCompatActivity() {
     }
 
     private fun sendCloud(playerName: String, correo: String) {
-        val url = "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayerIndividual"
+        val url =
+            "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayerIndividual"
         val payload = Gson().toJson(mapOf("name" to playerName, "correo" to correo))
         val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
         val body = RequestBody.create(mediaType, payload)
@@ -216,6 +231,7 @@ class MapMenuActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("FCM_FUNC", "Error calling CF", e)
             }
+
             override fun onResponse(call: Call, response: Response) {
                 if (!response.isSuccessful) Log.e("FCM_FUNC", "CF error: ${response.code}")
                 else Log.i("FCM_FUNC", "CF success: \${response.body?.string()}")
@@ -225,15 +241,23 @@ class MapMenuActivity : AppCompatActivity() {
     }
 
     private fun suscribirLocalizacion() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             // Permiso concedido, continuar con la lógica de localización
             locationSettings()
         } else {
             // Permiso no concedido
             if (!permisoSolicitado && shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
                 // Mostrar explicación si el usuario ya lo denegó antes
-                Toast.makeText(this, "El permiso es necesario para acceder a las funciones de localización.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "El permiso es necesario para acceder a las funciones de localización.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             // Solicitar el permiso (ya sea la primera vez o después de la explicación)
             if (!permisoSolicitado) {
@@ -243,11 +267,14 @@ class MapMenuActivity : AppCompatActivity() {
     }
 
     private fun setupMapa() {
-        Configuration.getInstance().load(this,
-            androidx.preference.PreferenceManager.getDefaultSharedPreferences(this))
+        Configuration.getInstance().load(
+            this,
+            androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        )
         map = binding.osmMap
         map.setTileSource(
-            TileSourceFactory.MAPNIK)
+            TileSourceFactory.MAPNIK
+        )
         map.setMultiTouchControls(true)
     }
 
@@ -298,19 +325,16 @@ class MapMenuActivity : AppCompatActivity() {
                             usuarioActual = usuario
 
                             // Enviar notificación
-                            usuarioActual?.let { u -> sendCloud(u.nombre,u.correo) }
+                            usuarioActual?.let { u -> sendCloud(u.nombre, u.correo) }
                         }
                     }
                 }.addOnFailureListener { e ->
-                    Log.e("DatabaseError", "Error al obtener los datos de la base de datos: ${e.message}")
+                    Log.e(
+                        "DatabaseError",
+                        "Error al obtener los datos de la base de datos: ${e.message}"
+                    )
                 }
-                }
-            usuarioActual?.let { it1 -> sendCloud(it1.nombre, it1.correo)
-            }
-            binding.listarDisponibles.setOnClickListener {
-                val bottomSheet = DisponiblesFragment()
-
-            //} else {
+            } else {
                 // DESACTIVAR DISPONIBILIDAD
                 disponible = false
                 binding.disponible.text = "Estoy disponible"
@@ -321,6 +345,9 @@ class MapMenuActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Ya no estás disponible", Toast.LENGTH_SHORT).show()
             }
+        }
+        binding.listarDisponibles.setOnClickListener {
+            val bottomSheet = DisponiblesFragment()
         }
         binding.botonDetenerSeguimiento.setOnClickListener {
             seguimientoListener?.let { listener ->
@@ -336,6 +363,7 @@ class MapMenuActivity : AppCompatActivity() {
                 Log.w("SEGUIMIENTO", "No se pudo mover la cámara: ubicación actual nula")
             }
         }
+
 
     }
 
@@ -402,7 +430,11 @@ class MapMenuActivity : AppCompatActivity() {
                         gpsDialogShown = true
                     } else {
                         // Ya mostramos el diálogo, no volver a pedir
-                        Toast.makeText(this, "Por favor activa el GPS en ajustes", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this,
+                            "Por favor activa el GPS en ajustes",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Toast.makeText(this, "Error al acceder al GPS", Toast.LENGTH_SHORT).show()
