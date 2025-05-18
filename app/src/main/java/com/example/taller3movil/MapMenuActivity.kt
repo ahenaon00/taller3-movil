@@ -162,7 +162,7 @@ class MapMenuActivity : AppCompatActivity() {
             // TO DO
         }
         binding.disponible.setOnClickListener {
-            if (disponible) {
+            if (!disponible) {
                 disponible = true
                 val user = FirebaseAuth.getInstance().currentUser
                 Log.i("USER", user?.email.toString())
