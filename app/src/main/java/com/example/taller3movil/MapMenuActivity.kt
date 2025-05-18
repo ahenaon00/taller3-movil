@@ -205,9 +205,9 @@ class MapMenuActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendCloud(playerName: String) {
+    private fun sendCloud(playerName: String, correo: String) {
         val url = "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayerIndividual"
-        val payload = Gson().toJson(mapOf("name" to playerName))
+        val payload = Gson().toJson(mapOf("name" to playerName, "correo" to correo))
         val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
         val body = RequestBody.create(mediaType, payload)
         val request = Request.Builder().url(url).post(body).build()
@@ -289,13 +289,14 @@ class MapMenuActivity : AppCompatActivity() {
                         "Error al obtener los datos de la base de datos: ${e.message}"
                     )
                 }
+                }
+            usuarioActual?.let { it1 -> sendCloud(it1.nombre, it1.correo)
             }
             binding.listarDisponibles.setOnClickListener {
                 val bottomSheet = DisponiblesFragment()
 
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             }
-            usuarioActual?.let { it1 -> sendCloud(it1.nombre) }
         }
         binding.botonDetenerSeguimiento.setOnClickListener {
             seguimientoListener?.let { listener ->

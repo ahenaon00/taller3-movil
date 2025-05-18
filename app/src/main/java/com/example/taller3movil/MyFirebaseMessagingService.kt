@@ -27,12 +27,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Prioriza el manejo de la carga de datos, que es lo que enviaría la Cloud Function
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
+
             val title = remoteMessage.data["title"] ?: "Jugador Disponible"
             val body = remoteMessage.data["body"] ?: "¡Alguien está esperando para jugar!"
-            sendNotification(title, body)
-        }
+            val correo = remoteMessage.data["correo"]
 
-        else if (remoteMessage.notification != null) {
+            Log.d(TAG, "User ID from message: $correo") // Para verificar que se recibió correctamente
+
+
+            sendNotification(title, body)
+        } else if (remoteMessage.notification != null) {
             Log.d(TAG, "Message Notification Body: ${remoteMessage.notification!!.body}")
             sendNotification(
                 remoteMessage.notification!!.title ?: "Título predeterminado",
@@ -40,6 +44,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
         }
     }
+
 
 
     override fun onNewToken(token: String) {
