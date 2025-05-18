@@ -157,7 +157,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#2196F3"
-                    android:text="@string/ingresar"
+                    android:text="@string/registrar"
                     android:textColor="@color/white" />
 
             </LinearLayout>

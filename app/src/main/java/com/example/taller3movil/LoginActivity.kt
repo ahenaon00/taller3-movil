@@ -71,12 +71,12 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user: FirebaseUser? = firebaseAuth.currentUser
                     Toast.makeText(this, "Inicio de sesión exitoso.", Toast.LENGTH_SHORT).show()
-
                     val uid = user?.uid
                     if (uid != null) {
                         val sharedPref = getSharedPreferences("GooterPrefs", MODE_PRIVATE)
                         sharedPref.edit().putString("uid_guardado", uid).apply()
                     }
+                    startActivity(Intent(this, MapMenuActivity::class.java))
 
                 } else {
                     val errorMessage = task.exception?.message ?: "Error desconocido"

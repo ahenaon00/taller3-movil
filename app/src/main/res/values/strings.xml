@@ -6,6 +6,7 @@
     <string name="usuario">Registro de Usuario</string>
     <string name="cancelar">Cancelar</string>
     <string name="ingresar">Ingresar</string>
+    <string name="registrar">Registrar</string>
     <string name="password">Ingrese una contraseña</string>
     <string name="password_hint">Contraseña</string>
     <!-- TODO: Remove or change this placeholder text -->
