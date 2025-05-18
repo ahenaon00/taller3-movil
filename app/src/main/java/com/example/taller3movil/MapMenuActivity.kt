@@ -56,6 +56,9 @@ class MapMenuActivity : AppCompatActivity() {
     private var refPush : DatabaseReference? = null
     private var disponible : Boolean = false
     private var usuarioActual : Usuario? = null
+    private var usuarioMarker: Marker? = null
+    private var seguimientoRef: DatabaseReference? = null
+    private var seguimientoListener: ValueEventListener? = null
 
 
     val locationSettings = registerForActivityResult(
@@ -100,6 +103,65 @@ class MapMenuActivity : AppCompatActivity() {
         inicializarListenersBotones()
         inicializarSuscrLocalizacion()
         askNotificationPermission()
+        inicializarSeguimiento()
+    }
+
+    private fun inicializarSeguimiento() {
+        // Revisar si se está haciendo seguimiento a otro usuario
+        if (intent.getStringExtra("tipo") == "seguimiento") {
+            val pushId = intent.getStringExtra("disponible_id")
+            val nombre = intent.getStringExtra("usuario_nombre") ?: "Usuario disponible"
+
+            Log.d("SEGUIMIENTO", "Tipo seguimiento detectado")
+            Log.d("SEGUIMIENTO", "ID recibido: $pushId")
+            Log.d("SEGUIMIENTO", "Nombre recibido: $nombre")
+
+            if (pushId != null) {
+                seguimientoRef = FirebaseDatabase.getInstance().getReference("disponibles").child(pushId)
+                Log.d("SEGUIMIENTO", "Referencia Firebase creada: disponibles/$pushId")
+
+                seguimientoListener = object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val latStr = snapshot.child("latitude").value?.toString()
+                        val lonStr = snapshot.child("longitude").value?.toString()
+                        val lat = latStr?.toDoubleOrNull()
+                        val lon = lonStr?.toDoubleOrNull()
+
+                        Log.d("SEGUIMIENTO", "onDataChange - lat: $latStr, lon: $lonStr")
+
+                        if (lat != null && lon != null) {
+                            val point = GeoPoint(lat, lon)
+
+                            if (usuarioMarker == null) {
+                                usuarioMarker = Marker(map).apply {
+                                    title = nombre
+                                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                    icon = ContextCompat.getDrawable(this@MapMenuActivity, R.drawable.ic_usuario_disponible)
+                                    map.overlays.add(this)
+                                }
+                                Log.d("SEGUIMIENTO", "Marker creado")
+                            }
+
+                            usuarioMarker?.position = point
+                            map.invalidate()
+                            map.controller.animateTo(point)
+                            Log.d("SEGUIMIENTO", "Marker actualizado a: $point")
+                        } else {
+                            Log.w("SEGUIMIENTO", "Latitud o longitud nula o inválida")
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("SEGUIMIENTO", "Error de suscripción: ${error.message}")
+                        Toast.makeText(this@MapMenuActivity, "Error de suscripción", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                seguimientoRef?.addValueEventListener(seguimientoListener!!)
+            } else {
+                Log.w("SEGUIMIENTO", "pushId es nulo")
+            }
+        }
     }
 
     private fun inicializarSuscrLocalizacion() {
@@ -210,13 +272,15 @@ class MapMenuActivity : AppCompatActivity() {
         map.onResume()
         map.controller.setZoom(18.0)
 
-        // Resetear el estado del diálogo cuando la actividad vuelve a primer plano
         gpsDialogShown = false
 
-        locationActual?.let {
-            map.controller.animateTo(it)
-        } ?: run {
-            map.controller.animateTo(BOGOTA)
+        val tipo = intent.getStringExtra("tipo")
+        if (tipo != "seguimiento") {
+            locationActual?.let {
+                map.controller.animateTo(it)
+            } ?: run {
+                map.controller.animateTo(BOGOTA)
+            }
         }
 
         if (ActivityCompat.checkSelfPermission(
@@ -234,6 +298,9 @@ class MapMenuActivity : AppCompatActivity() {
         super.onPause()
         map.onPause()
         stopLocationUpdates()
+        seguimientoListener?.let { listener ->
+            seguimientoRef?.removeEventListener(listener)
+        }
     }
 
     override fun onDestroy() {
@@ -339,8 +406,14 @@ class MapMenuActivity : AppCompatActivity() {
 
         if (moverCamara) {
             locationActual = newLocation
-            map.controller.animateTo(newLocation)
-            Log.i("LOCATION", "Moviendo cámara a nueva ubicación: $newLocation")
+
+            val tipo = intent.getStringExtra("tipo")
+            if (tipo != "seguimiento") {
+                map.controller.animateTo(newLocation)
+                Log.i("LOCATION", "Moviendo cámara a nueva ubicación: $newLocation")
+            } else {
+                Log.i("LOCATION", "Modo seguimiento activo, no mover cámara a mi ubicación")
+            }
         }
 
         markerLocationActual?.let {
