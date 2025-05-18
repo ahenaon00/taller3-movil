@@ -206,7 +206,7 @@ class MapMenuActivity : AppCompatActivity() {
     }
 
     private fun sendCloud(playerName: String) {
-        val url = "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayer"
+        val url = "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayerIndividual"
         val payload = Gson().toJson(mapOf("name" to playerName))
         val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
         val body = RequestBody.create(mediaType, payload)
