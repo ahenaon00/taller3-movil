@@ -27,7 +27,6 @@ class DisponiblesFragment : BottomSheetDialogFragment() {
     ): View {
         binding = FragmentDisponiblesBinding.inflate(inflater, container, false)
         cargarUsuario()
-        cargarDatos()
         return binding.root
     }
     private fun cargarDatos() {
@@ -63,6 +62,7 @@ class DisponiblesFragment : BottomSheetDialogFragment() {
                     userActual = Usuario("","",correo,"")
                 }
             }
+            cargarDatos()
         }.addOnFailureListener {
             //
         }
