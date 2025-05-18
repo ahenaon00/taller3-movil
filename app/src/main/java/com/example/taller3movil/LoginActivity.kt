@@ -76,7 +76,11 @@ class LoginActivity : AppCompatActivity() {
                         val sharedPref = getSharedPreferences("GooterPrefs", MODE_PRIVATE)
                         sharedPref.edit().putString("uid_guardado", uid).apply()
                     }
-                    startActivity(Intent(this, MapMenuActivity::class.java))
+
+                    val intent = Intent(this, MapMenuActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
 
                 } else {
                     val errorMessage = task.exception?.message ?: "Error desconocido"

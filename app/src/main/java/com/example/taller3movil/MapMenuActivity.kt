@@ -1,5 +1,6 @@
 package com.example.taller3movil
 
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
@@ -252,17 +253,32 @@ class MapMenuActivity : AppCompatActivity() {
 
     private fun inicializarListenersBotones() {
         binding.cerrarSesion.setOnClickListener {
-            // TO DO
+            FirebaseAuth.getInstance().signOut()
+
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         }
+        binding.listarDisponibles.setOnClickListener {
+            val bottomSheet = DisponiblesFragment()
+            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+        }
+
         binding.disponible.setOnClickListener {
             if (!disponible) {
+                // ACTIVAR DISPONIBILIDAD
                 disponible = true
+                binding.disponible.text = "No estoy disponible"
+
                 val user = FirebaseAuth.getInstance().currentUser
                 Log.i("USER", user?.email.toString())
+
                 val ref = FirebaseDatabase.getInstance().getReference()
                 val refDisponibles = ref.child("disponibles")
                 val uniqueId = refDisponibles.push()
                 refPush = uniqueId
+
                 val refUsuarios = ref.child("usuarios")
                 val query = refUsuarios.orderByChild("correo").equalTo(user?.email)
                 query.get().addOnSuccessListener { snapshot ->
@@ -281,13 +297,12 @@ class MapMenuActivity : AppCompatActivity() {
                             uniqueId.updateChildren(locActual)
                             usuarioActual = usuario
 
+                            // Enviar notificación
+                            usuarioActual?.let { u -> sendCloud(u.nombre) }
                         }
                     }
                 }.addOnFailureListener { e ->
-                    Log.e(
-                        "DatabaseError",
-                        "Error al obtener los datos de la base de datos: ${e.message}"
-                    )
+                    Log.e("DatabaseError", "Error al obtener los datos de la base de datos: ${e.message}")
                 }
                 }
             usuarioActual?.let { it1 -> sendCloud(it1.nombre, it1.correo)
@@ -295,7 +310,16 @@ class MapMenuActivity : AppCompatActivity() {
             binding.listarDisponibles.setOnClickListener {
                 val bottomSheet = DisponiblesFragment()
 
-                bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            } else {
+                // DESACTIVAR DISPONIBILIDAD
+                disponible = false
+                binding.disponible.text = "Estoy disponible"
+
+                // Borrar nodo de Firebase
+                refPush?.removeValue()
+                refPush = null
+
+                Toast.makeText(this, "Ya no estás disponible", Toast.LENGTH_SHORT).show()
             }
         }
         binding.botonDetenerSeguimiento.setOnClickListener {
