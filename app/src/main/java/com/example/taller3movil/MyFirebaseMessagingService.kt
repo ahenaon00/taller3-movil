@@ -101,11 +101,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Jugador Disponible",
-                NotificationManager.IMPORTANCE_HIGH
+                "Jugador Disponible", // Nombre visible del canal en la configuración del teléfono
+                NotificationManager.IMPORTANCE_HIGH // Importancia alta para que aparezca como heads-up notification (en la parte superior de la pantalla)
             )
             channel.description = "Notificaciones cuando hay jugadores disponibles"
             notificationManager.createNotificationChannel(channel)
         }
+
+        notificationManager.notify(0 /* Un ID único para esta notificación */, notificationBuilder.build())
     }
 }
