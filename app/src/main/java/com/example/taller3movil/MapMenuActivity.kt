@@ -111,6 +111,7 @@ class MapMenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        gpsDialogShown = false
         binding = ActivityMapMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupMapa()
@@ -189,7 +190,6 @@ class MapMenuActivity : AppCompatActivity() {
 
         ref.addValueEventListener(seguimientoListener!!)
     }
-
 
     private fun inicializarSuscrLocalizacion() {
         locationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -354,6 +354,13 @@ class MapMenuActivity : AppCompatActivity() {
             }
             seguimientoListener = null
             seguimientoRef = null
+
+            usuarioMarker?.let {
+                map.overlays.remove(it)
+                map.invalidate()
+            }
+            usuarioMarker = null
+
             binding.botonDetenerSeguimiento.visibility = View.GONE
             locationActual?.let {
                 map.controller.animateTo(it)
@@ -371,7 +378,6 @@ class MapMenuActivity : AppCompatActivity() {
         map.onResume()
         map.controller.setZoom(18.0)
 
-        gpsDialogShown = false
 
         val tipo = intent.getStringExtra("tipo")
         if (tipo != "seguimiento") {
@@ -413,7 +419,7 @@ class MapMenuActivity : AppCompatActivity() {
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
-        task.addOnSuccessListener { locationSettingsResponse ->
+        task.addOnSuccessListener {
             // GPS está activado, comenzar actualizaciones
             startLocationUpdates()
         }
@@ -421,22 +427,22 @@ class MapMenuActivity : AppCompatActivity() {
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
                 try {
-                    // Mostrar diálogo solo si no lo hemos mostrado antes
+                    // Mostrar diálogo solo si no se ha mostrado antes en esta sesión
                     if (!gpsDialogShown) {
                         val isr: IntentSenderRequest =
                             IntentSenderRequest.Builder(exception.resolution).build()
                         locationSettings.launch(isr)
-                        gpsDialogShown = true
+                        gpsDialogShown = true // Marcar que ya se mostró el diálogo
                     } else {
-                        // Ya mostramos el diálogo, no volver a pedir
+                        // Ya se mostró anteriormente, no volver a pedir
                         Toast.makeText(
                             this,
-                            "Por favor activa el GPS en ajustes",
+                            "Por favor activa el GPS desde los ajustes del sistema",
                             Toast.LENGTH_LONG
                         ).show()
                     }
                 } catch (sendEx: IntentSender.SendIntentException) {
-                    Toast.makeText(this, "Error al acceder al GPS", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al intentar activar el GPS", Toast.LENGTH_SHORT).show()
                 }
             }
         }
