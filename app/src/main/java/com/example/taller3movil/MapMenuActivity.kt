@@ -3,6 +3,7 @@ package com.example.taller3movil
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -81,6 +82,16 @@ class MapMenuActivity : AppCompatActivity() {
         }
     )
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Notificaciones permitidas en MapMenu", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Las notificaciones están deshabilitadas en MapMenu", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapMenuBinding.inflate(layoutInflater)
@@ -88,6 +99,7 @@ class MapMenuActivity : AppCompatActivity() {
         setupMapa()
         inicializarListenersBotones()
         inicializarSuscrLocalizacion()
+        askNotificationPermission()
     }
 
     private fun inicializarSuscrLocalizacion() {
@@ -95,6 +107,27 @@ class MapMenuActivity : AppCompatActivity() {
         locationRequest = createLocationRequest()
         locationCallback = createLocationCallback()
         suscribirLocalizacion()
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d("MapMenuActivity", "Notification permission already granted.")
+                // Ya tienes el permiso
+            } else if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+                // Opcional: Muestra una UI explicando por qué necesitas el permiso.
+                // Por ahora, solo lo solicitamos.
+                Log.d("MapMenuActivity", "Showing rationale or requesting permission.")
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+            else {
+                // Solicita el permiso
+                Log.d("MapMenuActivity", "Requesting notification permission.")
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     private fun suscribirLocalizacion() {

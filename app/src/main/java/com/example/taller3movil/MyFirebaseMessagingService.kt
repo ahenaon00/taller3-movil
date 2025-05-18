@@ -101,16 +101,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Notificaciones de Juego",
+                "Jugador Disponible",
                 NotificationManager.IMPORTANCE_HIGH
             )
             channel.description = "Notificaciones cuando hay jugadores disponibles"
             notificationManager.createNotificationChannel(channel)
         }
-         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-        notificationManager.notify(0 /* ID de la notificación, puede ser aleatorio o específico */, notificationBuilder.build())
-         } else {
-             Log.w(TAG, "POST_NOTIFICATIONS permission not granted. Notification not shown by app's direct call.")
-         }
     }
 }

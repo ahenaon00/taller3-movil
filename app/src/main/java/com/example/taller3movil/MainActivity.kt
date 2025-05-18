@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
 
         auth = FirebaseAuth.getInstance()
+        askNotificationPermission()
         val currentUser = auth.currentUser
         if (currentUser != null) {
             val intent = Intent(this, MapMenuActivity::class.java)
@@ -69,8 +70,6 @@ class MainActivity : AppCompatActivity() {
 
 
         // Solicita permiso para notificaciones
-        askNotificationPermission()
-
         NotificacionesDisponibles.getInstance().inicializar(this)
 
 
