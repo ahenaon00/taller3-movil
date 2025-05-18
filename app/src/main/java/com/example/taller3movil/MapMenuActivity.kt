@@ -48,7 +48,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
 
 
 class MapMenuActivity : AppCompatActivity() {
@@ -115,6 +119,7 @@ class MapMenuActivity : AppCompatActivity() {
         binding = ActivityMapMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupMapa()
+        cargarUbicacionesDeArchivo()
         inicializarListenersBotones()
         inicializarSuscrLocalizacion()
         askNotificationPermission()
@@ -433,13 +438,6 @@ class MapMenuActivity : AppCompatActivity() {
                             IntentSenderRequest.Builder(exception.resolution).build()
                         locationSettings.launch(isr)
                         gpsDialogShown = true // Marcar que ya se mostró el diálogo
-                    } else {
-                        // Ya se mostró anteriormente, no volver a pedir
-                        Toast.makeText(
-                            this,
-                            "Por favor activa el GPS desde los ajustes del sistema",
-                            Toast.LENGTH_LONG
-                        ).show()
                     }
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Toast.makeText(this, "Error al intentar activar el GPS", Toast.LENGTH_SHORT).show()
@@ -549,6 +547,38 @@ class MapMenuActivity : AppCompatActivity() {
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         val result = RADIUS_EARTH_METERS * c
         return Math.round(result * 100.0) / 100.0
+    }
+
+    private fun cargarUbicacionesDeArchivo() {
+        try {
+            val inputStream = assets.open("locations.json")
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            val jsonString = bufferedReader.use { it.readText() }
+
+            val jsonObject = JSONObject(jsonString)
+            val ubicacionesArray: JSONArray = jsonObject.getJSONArray("locationsArray")
+
+            for (i in 0 until ubicacionesArray.length()) {
+                val ubicacion = ubicacionesArray.getJSONObject(i)
+
+                val lat = ubicacion.getDouble("latitude")
+                val lon = ubicacion.getDouble("longitude")
+                val nombre = ubicacion.getString("name")
+
+                val punto = GeoPoint(lat, lon)
+                val marker = Marker(map).apply {
+                    position = punto
+                    title = nombre
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    icon = ContextCompat.getDrawable(this@MapMenuActivity, R.drawable.baseline_interest_location_24)
+                }
+                map.overlays.add(marker)
+            }
+            map.invalidate()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error leyendo ubicaciones JSON: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
 }
