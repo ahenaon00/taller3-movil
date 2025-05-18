@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.IntentSenderRequest
@@ -38,7 +39,15 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-
+import com.google.gson.Gson
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
+import java.io.IOException
 
 
 class MapMenuActivity : AppCompatActivity() {
@@ -104,6 +113,10 @@ class MapMenuActivity : AppCompatActivity() {
         inicializarSuscrLocalizacion()
         askNotificationPermission()
         inicializarSeguimiento()
+        val tipo = intent.getStringExtra("tipo")
+        if (tipo == "seguimiento") {
+            binding.botonDetenerSeguimiento.visibility = View.VISIBLE
+        }
     }
 
     private fun inicializarSeguimiento() {
@@ -192,6 +205,24 @@ class MapMenuActivity : AppCompatActivity() {
         }
     }
 
+    private fun sendCloud(playerName: String) {
+        val url = "https://us-central1-taller3-fad0b.cloudfunctions.net/notifyAvailablePlayer"
+        val payload = Gson().toJson(mapOf("name" to playerName))
+        val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+        val body = RequestBody.create(mediaType, payload)
+        val request = Request.Builder().url(url).post(body).build()
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("FCM_FUNC", "Error calling CF", e)
+            }
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) Log.e("FCM_FUNC", "CF error: ${response.code}")
+                else Log.i("FCM_FUNC", "CF success: \${response.body?.string()}")
+                response.close()
+            }
+        })
+    }
+
     private fun suscribirLocalizacion() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
@@ -249,6 +280,7 @@ class MapMenuActivity : AppCompatActivity() {
                             )
                             uniqueId.updateChildren(locActual)
                             usuarioActual = usuario
+
                         }
                     }
                 }.addOnFailureListener { e ->
@@ -262,6 +294,21 @@ class MapMenuActivity : AppCompatActivity() {
                 val bottomSheet = DisponiblesFragment()
 
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            }
+            usuarioActual?.let { it1 -> sendCloud(it1.nombre) }
+        }
+        binding.botonDetenerSeguimiento.setOnClickListener {
+            seguimientoListener?.let { listener ->
+                seguimientoRef?.removeEventListener(listener)
+            }
+            seguimientoListener = null
+            seguimientoRef = null
+            binding.botonDetenerSeguimiento.visibility = View.GONE
+            locationActual?.let {
+                map.controller.animateTo(it)
+                Log.i("SEGUIMIENTO", "Cámara movida a la ubicación del usuario actual: $it")
+            } ?: run {
+                Log.w("SEGUIMIENTO", "No se pudo mover la cámara: ubicación actual nula")
             }
         }
 
