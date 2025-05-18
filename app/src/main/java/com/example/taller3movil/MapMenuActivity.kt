@@ -125,70 +125,71 @@ class MapMenuActivity : AppCompatActivity() {
     }
 
     private fun inicializarSeguimiento() {
-        // Revisar si se está haciendo seguimiento a otro usuario
         if (intent.getStringExtra("tipo") == "seguimiento") {
             val pushId = intent.getStringExtra("disponible_id")
+            val correo = intent.getStringExtra("correo")
             val nombre = intent.getStringExtra("usuario_nombre") ?: "Usuario disponible"
 
-            Log.d("SEGUIMIENTO", "Tipo seguimiento detectado")
-            Log.d("SEGUIMIENTO", "ID recibido: $pushId")
-            Log.d("SEGUIMIENTO", "Nombre recibido: $nombre")
-
             if (pushId != null) {
-                seguimientoRef =
-                    FirebaseDatabase.getInstance().getReference("disponibles").child(pushId)
-                Log.d("SEGUIMIENTO", "Referencia Firebase creada: disponibles/$pushId")
-
-                seguimientoListener = object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val latStr = snapshot.child("latitude").value?.toString()
-                        val lonStr = snapshot.child("longitude").value?.toString()
-                        val lat = latStr?.toDoubleOrNull()
-                        val lon = lonStr?.toDoubleOrNull()
-
-                        Log.d("SEGUIMIENTO", "onDataChange - lat: $latStr, lon: $lonStr")
-
-                        if (lat != null && lon != null) {
-                            val point = GeoPoint(lat, lon)
-
-                            if (usuarioMarker == null) {
-                                usuarioMarker = Marker(map).apply {
-                                    title = nombre
-                                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                    icon = ContextCompat.getDrawable(
-                                        this@MapMenuActivity,
-                                        R.drawable.ic_usuario_disponible
-                                    )
-                                    map.overlays.add(this)
-                                }
-                                Log.d("SEGUIMIENTO", "Marker creado")
+                seguimientoRef = FirebaseDatabase.getInstance().getReference("disponibles").child(pushId)
+                iniciarListenerSeguimiento(seguimientoRef!!, nombre)
+            } else if (correo != null) {
+                // Buscar en "disponibles" al usuario por correo
+                val disponiblesRef = FirebaseDatabase.getInstance().getReference("disponibles")
+                disponiblesRef.orderByChild("correo").equalTo(correo)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            for (child in snapshot.children) {
+                                seguimientoRef = child.ref
+                                val nombreEncontrado = child.child("nombre").value?.toString() ?: nombre
+                                iniciarListenerSeguimiento(seguimientoRef!!, nombreEncontrado)
+                                return
                             }
-
-                            usuarioMarker?.position = point
-                            map.invalidate()
-                            map.controller.animateTo(point)
-                            Log.d("SEGUIMIENTO", "Marker actualizado a: $point")
-                        } else {
-                            Log.w("SEGUIMIENTO", "Latitud o longitud nula o inválida")
+                            Toast.makeText(this@MapMenuActivity, "Usuario no encontrado en disponibles", Toast.LENGTH_SHORT).show()
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        Log.e("SEGUIMIENTO", "Error de suscripción: ${error.message}")
-                        Toast.makeText(
-                            this@MapMenuActivity,
-                            "Error de suscripción",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-
-                seguimientoRef?.addValueEventListener(seguimientoListener!!)
-            } else {
-                Log.w("SEGUIMIENTO", "pushId es nulo")
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.e("SEGUIMIENTO", "Error al buscar usuario por correo: ${error.message}")
+                        }
+                    })
             }
         }
     }
+
+    private fun iniciarListenerSeguimiento(ref: DatabaseReference, nombre: String) {
+        seguimientoListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val latStr = snapshot.child("latitude").value?.toString()
+                val lonStr = snapshot.child("longitude").value?.toString()
+                val lat = latStr?.toDoubleOrNull()
+                val lon = lonStr?.toDoubleOrNull()
+
+                if (lat != null && lon != null) {
+                    val point = GeoPoint(lat, lon)
+
+                    if (usuarioMarker == null) {
+                        usuarioMarker = Marker(map).apply {
+                            title = nombre
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            icon = ContextCompat.getDrawable(this@MapMenuActivity, R.drawable.ic_usuario_disponible)
+                            map.overlays.add(this)
+                        }
+                    }
+
+                    usuarioMarker?.position = point
+                    map.invalidate()
+                    map.controller.animateTo(point)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("SEGUIMIENTO", "Error al suscribirse: ${error.message}")
+            }
+        }
+
+        ref.addValueEventListener(seguimientoListener!!)
+    }
+
 
     private fun inicializarSuscrLocalizacion() {
         locationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -346,9 +347,7 @@ class MapMenuActivity : AppCompatActivity() {
                 Toast.makeText(this, "Ya no estás disponible", Toast.LENGTH_SHORT).show()
             }
         }
-        binding.listarDisponibles.setOnClickListener {
-            val bottomSheet = DisponiblesFragment()
-        }
+
         binding.botonDetenerSeguimiento.setOnClickListener {
             seguimientoListener?.let { listener ->
                 seguimientoRef?.removeEventListener(listener)
