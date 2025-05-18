@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.IntentSenderRequest
@@ -104,6 +105,10 @@ class MapMenuActivity : AppCompatActivity() {
         inicializarSuscrLocalizacion()
         askNotificationPermission()
         inicializarSeguimiento()
+        val tipo = intent.getStringExtra("tipo")
+        if (tipo == "seguimiento") {
+            binding.botonDetenerSeguimiento.visibility = View.VISIBLE
+        }
     }
 
     private fun inicializarSeguimiento() {
@@ -262,6 +267,21 @@ class MapMenuActivity : AppCompatActivity() {
                 val bottomSheet = DisponiblesFragment()
 
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            }
+        }
+
+        binding.botonDetenerSeguimiento.setOnClickListener {
+            seguimientoListener?.let { listener ->
+                seguimientoRef?.removeEventListener(listener)
+            }
+            seguimientoListener = null
+            seguimientoRef = null
+            binding.botonDetenerSeguimiento.visibility = View.GONE
+            locationActual?.let {
+                map.controller.animateTo(it)
+                Log.i("SEGUIMIENTO", "Cámara movida a la ubicación del usuario actual: $it")
+            } ?: run {
+                Log.w("SEGUIMIENTO", "No se pudo mover la cámara: ubicación actual nula")
             }
         }
 
