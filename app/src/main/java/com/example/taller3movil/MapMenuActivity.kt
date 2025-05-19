@@ -73,6 +73,7 @@ class MapMenuActivity : AppCompatActivity() {
     private var usuarioMarker: Marker? = null
     private var seguimientoRef: DatabaseReference? = null
     private var seguimientoListener: ValueEventListener? = null
+    private var ultimaUbicacionSeguido: GeoPoint? = null
 
 
     val locationSettings = registerForActivityResult(
@@ -123,7 +124,6 @@ class MapMenuActivity : AppCompatActivity() {
         inicializarListenersBotones()
         inicializarSuscrLocalizacion()
         askNotificationPermission()
-        inicializarSeguimiento()
         val tipo = intent.getStringExtra("tipo")
         if (tipo == "seguimiento") {
             binding.botonDetenerSeguimiento.visibility = View.VISIBLE
@@ -184,7 +184,24 @@ class MapMenuActivity : AppCompatActivity() {
 
                     usuarioMarker?.position = point
                     map.invalidate()
-                    map.controller.animateTo(point)
+
+                    // 🔍 Solo mover la cámara si se ha desplazado más de 30 metros
+                    val moverCamara = ultimaUbicacionSeguido?.let { anterior ->
+                        distance(anterior.latitude, anterior.longitude, point.latitude, point.longitude) > 30
+                    } ?: true // Si no hay anterior, mover siempre
+
+                    if (moverCamara) {
+                        map.controller.animateTo(point)
+                        ultimaUbicacionSeguido = point
+                    }
+
+                    if (locationActual != null) {
+                        val actual = locationActual!!
+                        val distancia = distance(point.latitude, point.longitude, actual.latitude, actual.longitude)
+                        Toast.makeText(baseContext, "Distancia: $distancia metros", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(baseContext, "No se puede calcular la distancia", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -195,6 +212,7 @@ class MapMenuActivity : AppCompatActivity() {
 
         ref.addValueEventListener(seguimientoListener!!)
     }
+
 
     private fun inicializarSuscrLocalizacion() {
         locationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -505,7 +523,6 @@ class MapMenuActivity : AppCompatActivity() {
                 newLocation.latitude,
                 newLocation.longitude
             )
-
             if (distancia > 30.0) {
                 moverCamara = true
             }
@@ -518,8 +535,6 @@ class MapMenuActivity : AppCompatActivity() {
             if (tipo != "seguimiento") {
                 map.controller.animateTo(newLocation)
                 Log.i("LOCATION", "Moviendo cámara a nueva ubicación: $newLocation")
-            } else {
-                Log.i("LOCATION", "Modo seguimiento activo, no mover cámara a mi ubicación")
             }
         }
 
@@ -536,7 +551,13 @@ class MapMenuActivity : AppCompatActivity() {
 
         map.overlays.add(marker)
         markerLocationActual = marker
+
+        // ✅ Iniciar seguimiento solo cuando haya ubicación actual
+        if (intent.getStringExtra("tipo") == "seguimiento" && seguimientoListener == null) {
+            inicializarSeguimiento()
+        }
     }
+
 
     fun distance(lat1: Double, long1: Double, lat2: Double, long2: Double): Double {
         val latDistance = Math.toRadians(lat1 - lat2)
