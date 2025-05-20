@@ -93,9 +93,6 @@ class MapMenuActivity : AppCompatActivity() {
             permisoSolicitado = true
             if (it) {
                 locationSettings()
-            } else {
-                Toast.makeText(this, "No hay permiso para acceder al GPS", Toast.LENGTH_SHORT)
-                    .show()
             }
         }
     )
