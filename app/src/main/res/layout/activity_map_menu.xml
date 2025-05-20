@@ -21,6 +21,15 @@
         android:paddingHorizontal="8dp"
         android:gravity="center_horizontal">
 
+        <ImageButton
+            android:id="@+id/btnMyLocation"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="Mi ubicación"
+            android:src="@drawable/baseline_my_location_24"/>
+
         <Button
             android:id="@+id/botonDetenerSeguimiento"
             android:layout_width="match_parent"
@@ -29,6 +38,7 @@
             android:text="Detener seguimiento"
             android:layout_marginBottom="8dp"
             android:visibility="gone" />
+
 
         <LinearLayout
             android:layout_width="match_parent"

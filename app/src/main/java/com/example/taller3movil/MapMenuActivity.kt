@@ -393,6 +393,12 @@ class MapMenuActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnMyLocation.setOnClickListener {
+            locationActual?.let { current ->
+                map.controller.animateTo(current)
+                map.controller.setZoom(18.0)
+            }
+        }
 
     }
 
